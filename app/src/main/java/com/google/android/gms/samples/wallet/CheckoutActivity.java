@@ -25,6 +25,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.overstock.googlepay.PaymentsUtil;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -107,11 +109,11 @@ public class CheckoutActivity extends Activity {
    *     "https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentsClient.html#isReadyToPay(com.google.android.gms.wallet.IsReadyToPayRequest)">PaymentsClient#IsReadyToPay</a>
    */
   private void possiblyShowGooglePayButton() {
-    final Optional<JSONObject> isReadyToPayJson = PaymentsUtil.getIsReadyToPayRequest();
-    if (!isReadyToPayJson.isPresent()) {
+    final JSONObject isReadyToPayJson = PaymentsUtil.isReadyToPayRequest();
+    if (isReadyToPayJson == null)
       return;
-    }
-    IsReadyToPayRequest request = IsReadyToPayRequest.fromJson(isReadyToPayJson.get().toString());
+
+    IsReadyToPayRequest request = IsReadyToPayRequest.fromJson(isReadyToPayJson.toString());
     if (request == null) {
       return;
     }
@@ -264,15 +266,16 @@ public class CheckoutActivity extends Activity {
 
     // The price provided to the API should include taxes and shipping.
     // This price is not displayed to the user.
+
     String price = PaymentsUtil.microsToString(mBikeItem.getPriceMicros() + mShippingCost);
 
     // TransactionInfo transaction = PaymentsUtil.createTransaction(price);
-    Optional<JSONObject> paymentDataRequestJson = PaymentsUtil.getPaymentDataRequest(price);
-    if (!paymentDataRequestJson.isPresent()) {
+    JSONObject paymentDataRequestJson = PaymentsUtil.getPaymentDataRequest(price);
+    if (paymentDataRequestJson == null)
       return;
-    }
+
     PaymentDataRequest request =
-        PaymentDataRequest.fromJson(paymentDataRequestJson.get().toString());
+        PaymentDataRequest.fromJson(paymentDataRequestJson.toString());
 
     // Since loadPaymentData may show the UI asking the user to select a payment method, we use
     // AutoResolveHelper to wait for the user interacting with it. Once completed,
