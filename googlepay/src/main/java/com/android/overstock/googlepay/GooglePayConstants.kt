@@ -23,7 +23,7 @@ import java.util.HashMap
 
 /**
  * This file contains several constants you must edit before proceeding.
- * Please take a look at PaymentsUtil.java to see where the constants are used and to potentially
+ * Please take a look at GooglePayPaymentsUtil.java to see where the constants are used and to potentially
  * remove ones not relevant to your integration.
  *
  *
@@ -33,14 +33,21 @@ import java.util.HashMap
  * unsure)
  *  1.  Update CURRENCY_CODE to the currency you use.
  *  1.  Update SHIPPING_SUPPORTED_COUNTRIES to list the countries where you currently ship. If this
- * is not applicable to your app, remove the relevant bits from PaymentsUtil.java.
+ * is not applicable to your app, remove the relevant bits from GooglePayPaymentsUtil.java.
  *  1.  If you're integrating with your `PAYMENT_GATEWAY`, update
  * PAYMENT_GATEWAY_TOKENIZATION_NAME and PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS per the
  * instructions they provided. You don't need to update DIRECT_TOKENIZATION_PUBLIC_KEY.
  *  1.  If you're using `DIRECT` integration, please edit protocol version and public key as
  * per the instructions.
  */
-object Constants {
+
+//result code for initiating a google pay payment
+const val LOAD_PAYMENT_DATA_REQUEST_CODE = 991
+
+object GooglePayConstants {
+
+    //Google Pay conversion factor
+    val MICROS_PER_DOLLAR = 1000000;
     /**
      * Changing this to ENVIRONMENT_PRODUCTION will make the API return chargeable card information.
      * Please refer to the documentation to read about the required steps needed to enable
@@ -48,7 +55,8 @@ object Constants {
      *
      * @value #PAYMENTS_ENVIRONMENT
      */
-    val PAYMENTS_ENVIRONMENT = WalletConstants.ENVIRONMENT_TEST
+
+    val PAYMENTS_ENVIRONMENT = if(BuildConfig.DEBUG) WalletConstants.ENVIRONMENT_TEST else WalletConstants.ENVIRONMENT_PRODUCTION
 
     /**
      * The allowed networks to be requested from the API. If the user has cards from networks not
@@ -59,7 +67,7 @@ object Constants {
     val SUPPORTED_NETWORKS = Arrays.asList(
             "AMEX",
             "DISCOVER",
-            "JCB",
+            //"JCB",
             "MASTERCARD",
             "VISA")
 
@@ -86,7 +94,7 @@ object Constants {
      *
      * @value #SHIPPING_SUPPORTED_COUNTRIES
      */
-    val SHIPPING_SUPPORTED_COUNTRIES = Arrays.asList("US", "GB")
+    val SHIPPING_SUPPORTED_COUNTRIES = Arrays.asList("US")
 
     /**
      * The name of your payment processor/gateway. Please refer to their documentation for more
@@ -118,7 +126,7 @@ object Constants {
      *
      * @value #DIRECT_TOKENIZATION_PUBLIC_KEY
      */
-    val DIRECT_TOKENIZATION_PUBLIC_KEY = "REPLACE_ME"
+    val DIRECT_TOKENIZATION_PUBLIC_KEY = "BDd7hKPmIavM8arhHZ4/kj996VK/4fIYHBPTuljZSB1lhvJS5SrmVHILqUaEnvMYdKTliL0Ajow8bEcgck/WnYM="
 
     /**
      * Parameters required for `DIRECT` tokenization.

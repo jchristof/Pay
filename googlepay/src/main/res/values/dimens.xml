@@ -16,9 +16,13 @@
 -->
 
 <resources>
-    <string name="app_name" translatable="false">My Online Store App</string>
-    <string name="store_name" translatable="false">My Online Store</string>
-    <string name="googlepay_status_unavailable" translatable="false">Unfortunately, Google Pay is not available on this phone.</string>
-    <string name="googlepay_status_checking" translatable="false">Checking if Google Pay is available...</string>
-    <string name="payments_show_name" translatable="false">Successfully received payment data for %s!</string>
+
+    <dimen name="padding_small">5dp</dimen>
+    <dimen name="margin_large">10dp</dimen>
+    <dimen name="margin_xlarge">30dp</dimen>
+
+    <dimen name="buy_button_width">300dp</dimen>
+    <dimen name="buy_button_height">48sp</dimen>
+    <dimen name="buy_button_min_width">200dp</dimen>
+
 </resources>

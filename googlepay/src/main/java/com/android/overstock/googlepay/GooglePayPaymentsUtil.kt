@@ -20,6 +20,7 @@ import android.app.Activity
 
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
+import com.google.android.gms.wallet.WalletConstants
 
 import org.json.JSONArray
 import org.json.JSONException
@@ -27,7 +28,6 @@ import org.json.JSONObject
 
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.Optional
 
 /**
  * Contains helper static methods for dealing with the Payments API.
@@ -37,7 +37,7 @@ import java.util.Optional
  * existence. Please consult the documentation to learn more and feel free to remove ones not
  * relevant to your implementation.
  */
-object PaymentsUtil {
+object GooglePayPaymentsUtil {
     private val MICROS = BigDecimal(1000000.0)
 
     /**
@@ -58,7 +58,7 @@ object PaymentsUtil {
      * by a supported gateway after payer authorization.
      *
      *
-     * TODO: Check with your gateway on the parameters to pass and modify them in Constants.java.
+     * TODO: Check with your gateway on the parameters to pass and modify them in GooglePayConstants.java.
      *
      * @return Payment data tokenization for the CARD payment method.
      * @throws JSONException
@@ -67,14 +67,14 @@ object PaymentsUtil {
     private val gatewayTokenizationSpecification: JSONObject
         @Throws(JSONException::class, RuntimeException::class)
         get() {
-            if (Constants.PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS.isEmpty()) {
+            if (GooglePayConstants.PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS.isEmpty()) {
                 throw RuntimeException(
-                        "Please edit the Constants.java file to add gateway name and other parameters your " + "processor requires")
+                        "Please edit the GooglePayConstants.java file to add gateway name and other parameters your " + "processor requires")
             }
             val tokenizationSpecification = JSONObject()
 
             tokenizationSpecification.put("type", "PAYMENT_GATEWAY")
-            val parameters = JSONObject(Constants.PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS)
+            val parameters = JSONObject(GooglePayConstants.PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS)
             tokenizationSpecification.put("parameters", parameters)
 
             return tokenizationSpecification
@@ -95,17 +95,17 @@ object PaymentsUtil {
     private val directTokenizationSpecification: JSONObject
         @Throws(JSONException::class, RuntimeException::class)
         get() {
-            if (Constants.DIRECT_TOKENIZATION_PARAMETERS.isEmpty()
-                    || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY.isEmpty()
-                    || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY == null
-                    || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY === "REPLACE_ME") {
+            if (GooglePayConstants.DIRECT_TOKENIZATION_PARAMETERS.isEmpty()
+                    || GooglePayConstants.DIRECT_TOKENIZATION_PUBLIC_KEY.isEmpty()
+                    || GooglePayConstants.DIRECT_TOKENIZATION_PUBLIC_KEY == null
+                    || GooglePayConstants.DIRECT_TOKENIZATION_PUBLIC_KEY === "REPLACE_ME") {
                 throw RuntimeException(
-                        "Please edit the Constants.java file to add protocol version & public key.")
+                        "Please edit the GooglePayConstants.java file to add protocol version & public key.")
             }
             val tokenizationSpecification = JSONObject()
 
             tokenizationSpecification.put("type", "DIRECT")
-            val parameters = JSONObject(Constants.DIRECT_TOKENIZATION_PARAMETERS)
+            val parameters = JSONObject(GooglePayConstants.DIRECT_TOKENIZATION_PARAMETERS)
             tokenizationSpecification.put("parameters", parameters)
 
             return tokenizationSpecification
@@ -115,26 +115,26 @@ object PaymentsUtil {
      * Card networks supported by your app and your gateway.
      *
      *
-     * TODO: Confirm card networks supported by your app and gateway & update in Constants.java.
+     * TODO: Confirm card networks supported by your app and gateway & update in GooglePayConstants.java.
      *
      * @return Allowed card networks
      * @see [CardParameters](https://developers.google.com/pay/api/android/reference/object.CardParameters)
      */
     private val allowedCardNetworks: JSONArray
-        get() = JSONArray(Constants.SUPPORTED_NETWORKS)
+        get() = JSONArray(GooglePayConstants.SUPPORTED_NETWORKS)
 
     /**
      * Card authentication methods supported by your app and your gateway.
      *
      *
      * TODO: Confirm your processor supports Android device tokens on your supported card networks
-     * and make updates in Constants.java.
+     * and make updates in GooglePayConstants.java.
      *
      * @return Allowed card authentication methods.
      * @see [CardParameters](https://developers.google.com/pay/api/android/reference/object.CardParameters)
      */
     private val allowedCardAuthMethods: JSONArray
-        get() = JSONArray(Constants.SUPPORTED_METHODS)
+        get() = JSONArray(GooglePayConstants.SUPPORTED_METHODS)
 
     /**
      * Describe your app's support for the CARD payment method.
@@ -180,8 +180,8 @@ object PaymentsUtil {
         @Throws(JSONException::class)
         get() {
             val cardPaymentMethod = baseCardPaymentMethod
-            cardPaymentMethod.put("tokenizationSpecification", gatewayTokenizationSpecification)
-
+            //cardPaymentMethod.put("tokenizationSpecification", gatewayTokenizationSpecification)
+            cardPaymentMethod.put("tokenizationSpecification", directTokenizationSpecification)
             return cardPaymentMethod
         }
 
@@ -216,17 +216,17 @@ object PaymentsUtil {
      */
     private val merchantInfo: JSONObject
         @Throws(JSONException::class)
-        get() = JSONObject().put("merchantName", "Example Merchant")
+        get() = JSONObject().put("merchantName", "OSTK")
 
     /**
      * Creates an instance of [PaymentsClient] for use in an [Activity] using the
-     * environment and theme set in [Constants].
+     * environment and theme set in [GooglePayConstants].
      *
      * @param activity is the caller's activity.
      */
     @JvmStatic
     fun createPaymentsClient(activity: Activity): PaymentsClient {
-        val walletOptions = Wallet.WalletOptions.Builder().setEnvironment(Constants.PAYMENTS_ENVIRONMENT).build()
+        val walletOptions = Wallet.WalletOptions.Builder().setEnvironment(GooglePayConstants.PAYMENTS_ENVIRONMENT).build()
         return Wallet.getPaymentsClient(activity, walletOptions)
     }
 
@@ -242,7 +242,7 @@ object PaymentsUtil {
         val transactionInfo = JSONObject()
         transactionInfo.put("totalPrice", price)
         transactionInfo.put("totalPriceStatus", "FINAL")
-        transactionInfo.put("currencyCode", Constants.CURRENCY_CODE)
+        transactionInfo.put("currencyCode", GooglePayConstants.CURRENCY_CODE)
 
         return transactionInfo
     }
@@ -256,11 +256,11 @@ object PaymentsUtil {
     @JvmStatic
     fun getPaymentDataRequest(price: String): JSONObject? {
         try {
-            val paymentDataRequest = PaymentsUtil.baseRequest
+            val paymentDataRequest = GooglePayPaymentsUtil.baseRequest
             paymentDataRequest.put(
-                    "allowedPaymentMethods", JSONArray().put(PaymentsUtil.cardPaymentMethod))
-            paymentDataRequest.put("transactionInfo", PaymentsUtil.getTransactionInfo(price))
-            paymentDataRequest.put("merchantInfo", PaymentsUtil.merchantInfo)
+                    "allowedPaymentMethods", JSONArray().put(GooglePayPaymentsUtil.cardPaymentMethod))
+            paymentDataRequest.put("transactionInfo", GooglePayPaymentsUtil.getTransactionInfo(price))
+            paymentDataRequest.put("merchantInfo", GooglePayPaymentsUtil.merchantInfo)
 
             /* An optional shipping address requirement is a top-level property of the PaymentDataRequest
       JSON object. */
@@ -269,7 +269,7 @@ object PaymentsUtil {
             val shippingAddressParameters = JSONObject()
             shippingAddressParameters.put("phoneNumberRequired", false)
 
-            val allowedCountryCodes = JSONArray(Constants.SHIPPING_SUPPORTED_COUNTRIES)
+            val allowedCountryCodes = JSONArray(GooglePayConstants.SHIPPING_SUPPORTED_COUNTRIES)
 
             shippingAddressParameters.put("allowedCountryCodes", allowedCountryCodes)
             paymentDataRequest.put("shippingAddressParameters", shippingAddressParameters)
@@ -281,7 +281,7 @@ object PaymentsUtil {
     }
 
     /**
-     * Converts micros to a string format accepted by [PaymentsUtil.getPaymentDataRequest].
+     * Converts micros to a string format accepted by [GooglePayPaymentsUtil.getPaymentDataRequest].
      *
      * @param micros value of the price.
      */
